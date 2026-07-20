@@ -16,10 +16,13 @@ import sys
 
 def _resources_dir() -> str | None:
     if getattr(sys, "frozen", False):
-        # PyInstaller --windowed .app layout: Contents/MacOS/<exe>, and
-        # bundled --add-binary/--add-data files land in Contents/MacOS too
-        # (or Contents/Resources for --add-data with an explicit destdir).
-        return os.path.dirname(sys.executable)
+        # PyInstaller --windowed .app layout: the executable lives in
+        # Contents/MacOS/<exe>, but --add-binary/--add-data files actually
+        # land in Contents/Frameworks (confirmed by inspecting a real build
+        # — despite --contents-directory "." not literally flattening
+        # things onto Contents/MacOS for BUNDLE-mode macOS builds).
+        macos_dir = os.path.dirname(sys.executable)
+        return os.path.normpath(os.path.join(macos_dir, "..", "Frameworks"))
     return None
 
 
@@ -44,9 +47,12 @@ def find_pandoc() -> str | None:
 def find_soffice() -> str | None:
     res = _resources_dir()
     if res:
-        bundled = os.path.join(res, "LibreOffice.app", "Contents", "MacOS", "soffice")
-        if os.path.exists(bundled):
-            return bundled
+        # PyInstaller sanitizes ".app" in bundled data-file dirnames to
+        # "__dot__app" to avoid macOS treating it as a nested bundle.
+        for app_dirname in ("LibreOffice__dot__app", "LibreOffice.app"):
+            bundled = os.path.join(res, app_dirname, "Contents", "MacOS", "soffice")
+            if os.path.exists(bundled):
+                return bundled
 
     system_app = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
     if os.path.exists(system_app):

@@ -18,6 +18,7 @@ if [[ ! -d "$LIBREOFFICE_APP" ]]; then
 fi
 
 echo "==> Generating app icon (.icns) from the goat emoji"
+rm -f goatconvert/assets/goat_icon.png goatconvert/assets/goat_icon.icns
 python3 -c "from goatconvert.ui.icon import ensure_icon; print(ensure_icon())"
 ICONSET=/tmp/goatconvert_icon.iconset
 rm -rf "$ICONSET" && mkdir -p "$ICONSET"
@@ -29,7 +30,7 @@ done
 iconutil -c icns "$ICONSET" -o goatconvert/assets/goat_icon.icns
 
 echo "==> Cleaning previous build"
-rm -rf build dist
+rm -rf build dist GOATconvert.spec
 
 echo "==> Running PyInstaller (this copies ~800MB of LibreOffice, be patient)"
 pyinstaller --windowed --name GOATconvert \
@@ -38,6 +39,7 @@ pyinstaller --windowed --name GOATconvert \
   --add-binary "${FFMPEG_BIN}:." \
   --add-binary "${PANDOC_BIN}:." \
   --add-data "${LIBREOFFICE_APP}:LibreOffice.app" \
+  --add-data "goatconvert/assets/goat_icon.png:." \
   --noconfirm \
   main.py
 

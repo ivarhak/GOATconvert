@@ -1,47 +1,66 @@
 """Renders the 🐐 emoji to a PNG once, used as the window/app icon.
 
-Generated locally via Pillow's emoji-font rendering (no network fetch) —
-uses whatever system emoji font is available (Apple Color Emoji on macOS).
+Rendered via Qt's own text painter rather than Pillow's font engine — Qt
+uses macOS's native CoreText backend, which handles Apple Color Emoji's
+color glyph tables correctly. Pillow's raqm-less renderer silently fails
+to draw color glyphs from that font, producing a blank icon.
 """
 
 from __future__ import annotations
 
 import os
+import sys
+import tempfile
 
 _ICON_PATH = os.path.join(os.path.dirname(__file__), "..", "assets", "goat_icon.png")
 
 
-def ensure_icon() -> str:
-    icon_path = os.path.abspath(_ICON_PATH)
-    if os.path.exists(icon_path):
-        return icon_path
+def _render_goat_png(icon_path: str) -> None:
+    from PySide6.QtCore import Qt
+    from PySide6.QtGui import QFont, QGuiApplication, QImage, QPainter
 
-    from PIL import Image, ImageDraw, ImageFont
+    app = QGuiApplication.instance()
+    if app is None:
+        app = QGuiApplication(sys.argv[:1])
 
-    size = 256
-    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
+    size = 512
+    img = QImage(size, size, QImage.Format.Format_ARGB32)
+    img.fill(Qt.GlobalColor.transparent)
 
-    font = None
-    for font_path in (
-        "/System/Library/Fonts/Apple Color Emoji.ttc",
-        "/System/Library/Fonts/Supplemental/Apple Color Emoji.ttc",
-    ):
-        if os.path.exists(font_path):
-            try:
-                font = ImageFont.truetype(font_path, size - 40)
-                break
-            except OSError:
-                continue
-
-    if font is not None:
-        draw.text((size // 2, size // 2), "\U0001F410", font=font, anchor="mm", embedded_color=True)
-    else:
-        # Fallback: simple colored circle with "G" if no emoji font found
-        draw.ellipse((10, 10, size - 10, size - 10), fill=(220, 200, 160, 255))
-        draw.text((size // 2, size // 2), "G", fill=(60, 40, 20, 255), anchor="mm")
+    painter = QPainter(img)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+    font = QFont()
+    font.setPointSize(int(size * 0.7))
+    painter.setFont(font)
+    painter.drawText(img.rect(), Qt.AlignmentFlag.AlignCenter, "\U0001F410")
+    painter.end()
 
     os.makedirs(os.path.dirname(icon_path), exist_ok=True)
     img.save(icon_path)
     print(f"[icon] generated {icon_path}")
+
+
+def ensure_icon() -> str:
+    if getattr(sys, "frozen", False):
+        # Packaged builds ship this file baked in (build_app.sh generates
+        # it before running PyInstaller and bundles it as a flat top-level
+        # file, sitting next to ffmpeg/pandoc — see bundled_paths.py). If
+        # it's somehow missing at runtime, don't try to write into the
+        # read-only app bundle — fall back to a temp file instead.
+        macos_dir = os.path.dirname(sys.executable)
+        frameworks_dir = os.path.normpath(os.path.join(macos_dir, "..", "Frameworks"))
+        bundled = os.path.join(frameworks_dir, "goat_icon.png")
+        if os.path.exists(bundled):
+            return bundled
+
+        fallback = os.path.join(tempfile.gettempdir(), "goatconvert_goat_icon.png")
+        if os.path.exists(fallback):
+            return fallback
+        _render_goat_png(fallback)
+        return fallback
+
+    icon_path = os.path.abspath(_ICON_PATH)
+    if os.path.exists(icon_path):
+        return icon_path
+    _render_goat_png(icon_path)
     return icon_path
