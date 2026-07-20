@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+goatconvert/assets/goat_icon.png
+goatconvert/assets/goat_icon.icns
+build/
+dist/
+*.spec
