@@ -60,19 +60,18 @@ def find_pandoc() -> str | None:
 
 
 def find_soffice() -> str | None:
-    res = _resources_dir()
-    if res:
-        if _IS_WINDOWS:
+    # On macOS, LibreOffice.app ships as a separate item in the DMG rather
+    # than nested inside our own .app bundle (see build_app.sh for why —
+    # nesting a huge pre-signed third-party app broke code signing in
+    # several distinct ways), so there's no "look inside our own bundle"
+    # case there. On Windows, PyInstaller's onedir layout doesn't have that
+    # problem, so LibreOffice is bundled directly alongside the .exe.
+    if _IS_WINDOWS:
+        res = _resources_dir()
+        if res:
             bundled = os.path.join(res, "LibreOffice", "program", "soffice.exe")
             if os.path.exists(bundled):
                 return bundled
-        else:
-            # PyInstaller sanitizes ".app" in bundled data-file dirnames to
-            # "__dot__app" to avoid macOS treating it as a nested bundle.
-            for app_dirname in ("LibreOffice__dot__app", "LibreOffice.app"):
-                bundled = os.path.join(res, app_dirname, "Contents", "MacOS", "soffice")
-                if os.path.exists(bundled):
-                    return bundled
 
     if _IS_WINDOWS:
         for path in (

@@ -8,14 +8,20 @@ ever — everything runs through locally installed conversion engines.
 
 Download the latest release from the [Releases](../../releases) page:
 
-- **macOS**: `GOATconvert.dmg` — open it, drag GOATconvert into Applications.
+- **macOS**: `GOATconvert.dmg` — open it, drag **both** GOATconvert and
+  LibreOffice into Applications. ffmpeg and pandoc are bundled inside
+  GOATconvert.app itself; LibreOffice ships as its own app in the same DMG
+  rather than nested inside GOATconvert's bundle — nesting a huge
+  pre-signed third-party app broke macOS code signing in several ways and
+  made the whole download report as "damaged". Two drags, still fully
+  offline, nothing downloaded from the internet.
 - **Windows**: `GOATconvert-Setup.exe` — run it, follow the installer.
+  ffmpeg, pandoc, and LibreOffice are all bundled inside on Windows (no
+  code-signing conflict there).
 
-ffmpeg, pandoc, and LibreOffice are bundled inside both — nothing else to
-install. Fully offline. Both builds are unsigned (no Apple/Microsoft
-developer certificate), so the OS will warn about an unidentified
-publisher on first launch — on macOS right-click → Open, on Windows click
-"More info" → "Run anyway".
+Both builds are unsigned (no Apple/Microsoft developer certificate), so
+the OS will warn about an unidentified publisher on first launch — on
+macOS right-click → Open, on Windows click "More info" → "Run anyway".
 
 ## Run from source (for development)
 
