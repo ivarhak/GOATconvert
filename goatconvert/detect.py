@@ -32,8 +32,12 @@ _SIGNATURES: list[tuple[str, bytes, int]] = [
     ("ogg", b"OggS", 0),
     ("wav", b"WAVE", 8),  # RIFF....WAVE
     ("mp3", b"ID3", 0),
-    ("mp4", b"ftyp", 4),
+    # mov's signature (b"ftypqt") is a more specific case of mp4's generic
+    # b"ftyp" box header, so it must be checked first — otherwise every
+    # .mov file would match the generic mp4 pattern before ever reaching
+    # the mov check.
     ("mov", b"ftypqt", 4),
+    ("mp4", b"ftyp", 4),
     ("mkv", b"\x1a\x45\xdf\xa3", 0),  # also matches webm (both EBML)
     ("rtf", b"{\\rtf", 0),
 ]
