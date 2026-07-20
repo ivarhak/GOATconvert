@@ -12,6 +12,8 @@ import os
 import sys
 import tempfile
 
+from .. import bundled_paths
+
 _ICON_PATH = os.path.join(os.path.dirname(__file__), "..", "assets", "goat_icon.png")
 
 
@@ -42,15 +44,15 @@ def _render_goat_png(icon_path: str) -> None:
 
 def ensure_icon() -> str:
     if getattr(sys, "frozen", False):
-        # Packaged builds ship this file baked in (build_app.sh generates
-        # it before running PyInstaller and bundles it as a flat top-level
-        # file, sitting next to ffmpeg/pandoc — see bundled_paths.py). If
-        # it's somehow missing at runtime, don't try to write into the
-        # read-only app bundle — fall back to a temp file instead.
-        macos_dir = os.path.dirname(sys.executable)
-        frameworks_dir = os.path.normpath(os.path.join(macos_dir, "..", "Frameworks"))
-        bundled = os.path.join(frameworks_dir, "goat_icon.png")
-        if os.path.exists(bundled):
+        # Packaged builds ship this file baked in (the build script
+        # generates it before running PyInstaller and bundles it as a flat
+        # top-level file, sitting next to ffmpeg/pandoc — see
+        # bundled_paths.py). If it's somehow missing at runtime, don't try
+        # to write into the read-only app bundle — fall back to a temp
+        # file instead.
+        res = bundled_paths._resources_dir()
+        bundled = os.path.join(res, "goat_icon.png") if res else None
+        if bundled and os.path.exists(bundled):
             return bundled
 
         fallback = os.path.join(tempfile.gettempdir(), "goatconvert_goat_icon.png")

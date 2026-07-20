@@ -4,6 +4,8 @@ __pycache__/
 .DS_Store
 goatconvert/assets/goat_icon.png
 goatconvert/assets/goat_icon.icns
+goatconvert/assets/goat_icon.ico
 build/
 dist/
+installer_output/
 *.spec

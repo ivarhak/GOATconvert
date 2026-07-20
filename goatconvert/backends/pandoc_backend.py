@@ -11,9 +11,11 @@ import subprocess
 
 from .. import bundled_paths
 
-CATEGORY = "Documents"
-
 FORMATS = {"md", "html", "docx", "odt", "rtf", "txt", "tex", "epub", "rst", "textile", "org", "asciidoc"}
+
+
+def category_for(fmt: str) -> str:
+    return "Documents"
 
 
 def is_available() -> bool:

@@ -1,9 +1,14 @@
 """Aggregates every backend's capabilities into one lookup used by the UI.
 
-Each backend module exposes: is_available(), can_handle(fmt), CATEGORY,
-target_formats_for(fmt), convert(input_path, output_path, target_format).
-Adding a new backend later (e.g. Calibre for ebooks) means writing one more
-module and adding it to BACKENDS below — nothing else changes.
+Each backend module exposes: is_available(), can_handle(fmt),
+category_for(fmt), target_formats_for(fmt), convert(input_path,
+output_path, target_format). category_for is per-format rather than a
+fixed constant because a single backend can span more than one logical
+category — ffmpeg alone handles both "Audio" and "Video" targets, and an
+mp3 target shouldn't be labeled "Audio & Video" just because the same
+binary happens to also do video. Adding a new backend later (e.g. Calibre
+for ebooks) means writing one more module and adding it to BACKENDS below
+— nothing else changes.
 """
 
 from __future__ import annotations
@@ -39,7 +44,7 @@ def targets_for_file(detected_format: str) -> list[TargetFormat]:
             continue
         for fmt in backend.target_formats_for(detected_format):
             if fmt not in results:
-                results[fmt] = TargetFormat(format=fmt, category=backend.CATEGORY, backend=backend)
+                results[fmt] = TargetFormat(format=fmt, category=backend.category_for(fmt), backend=backend)
     return sorted(results.values(), key=lambda t: (t.category, t.format))
 
 

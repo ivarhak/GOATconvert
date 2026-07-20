@@ -14,10 +14,12 @@ from pathlib import Path
 
 from .. import bundled_paths
 
-CATEGORY = "Documents"
-
 OFFICE_FORMATS = {"doc", "docx", "odt", "rtf", "xls", "xlsx", "ods", "ppt", "pptx", "odp", "csv"}
 FORMATS = OFFICE_FORMATS | {"pdf"}
+
+
+def category_for(fmt: str) -> str:
+    return "Documents"
 
 
 def is_available() -> bool:

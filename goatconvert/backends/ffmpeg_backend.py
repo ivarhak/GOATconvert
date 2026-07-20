@@ -6,11 +6,13 @@ import subprocess
 
 from .. import bundled_paths
 
-CATEGORY = "Audio & Video"
-
 AUDIO_FORMATS = {"mp3", "wav", "flac", "ogg", "aac", "m4a", "wma", "opus"}
 VIDEO_FORMATS = {"mp4", "mov", "mkv", "webm", "avi", "flv", "wmv", "m4v"}
 ALL_FORMATS = AUDIO_FORMATS | VIDEO_FORMATS
+
+
+def category_for(fmt: str) -> str:
+    return "Video" if fmt in VIDEO_FORMATS else "Audio"
 
 
 def is_available() -> bool:

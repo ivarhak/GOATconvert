@@ -6,9 +6,16 @@ ever — everything runs through locally installed conversion engines.
 
 ## Get the app (easiest)
 
-Download the latest `GOATconvert.dmg` from the [Releases](../../releases)
-page, open it, drag GOATconvert into Applications. ffmpeg, pandoc, and
-LibreOffice are bundled inside — nothing else to install. Fully offline.
+Download the latest release from the [Releases](../../releases) page:
+
+- **macOS**: `GOATconvert.dmg` — open it, drag GOATconvert into Applications.
+- **Windows**: `GOATconvert-Setup.exe` — run it, follow the installer.
+
+ffmpeg, pandoc, and LibreOffice are bundled inside both — nothing else to
+install. Fully offline. Both builds are unsigned (no Apple/Microsoft
+developer certificate), so the OS will warn about an unidentified
+publisher on first launch — on macOS right-click → Open, on Windows click
+"More info" → "Run anyway".
 
 ## Run from source (for development)
 
@@ -22,18 +29,31 @@ pip install -r requirements.txt
 python3 main.py
 ```
 
-## Building the standalone .app / .dmg
+## Building the standalone app
+
+macOS (produces `dist/GOATconvert.app` and `dist/GOATconvert.dmg`):
 
 ```bash
 source venv/bin/activate
-pip install pyinstaller
+pip install -r requirements.txt
 ./build_app.sh
 ```
 
-Produces `dist/GOATconvert.app` and `dist/GOATconvert.dmg`, with ffmpeg,
-pandoc, and a full copy of LibreOffice bundled inside the app bundle (see
-`goatconvert/bundled_paths.py` for how those are located at runtime). This
-is what gets attached to GitHub Releases.
+Windows (produces `dist/GOATconvert/` and, via Inno Setup,
+`installer_output/GOATconvert-Setup.exe`):
+
+```powershell
+pip install -r requirements.txt
+.\build_app.ps1 -FfmpegPath <path to ffmpeg.exe> -PandocPath <path to pandoc.exe>
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+```
+
+Both bundle ffmpeg, pandoc, and a full copy of LibreOffice inside the app
+(see `goatconvert/bundled_paths.py` for how those are located at runtime,
+cross-platform). In practice these are run automatically by
+`.github/workflows/release.yml` on a `macos-latest`/`windows-latest`
+runner whenever a `vX.Y.Z` tag is pushed, and the results are attached to
+a GitHub Release — that's what's on the Releases page.
 
 ## What it can convert
 

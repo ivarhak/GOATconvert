@@ -8,12 +8,14 @@ with zero native-library bundling headaches.
 
 from __future__ import annotations
 
-CATEGORY = "Images"
-
 RASTER_FORMATS = {"png", "jpg", "webp", "bmp", "tiff", "gif", "heic"}
 FORMATS = RASTER_FORMATS
 
 _PILLOW_SAVE_FORMAT = {"jpg": "JPEG"}  # Pillow needs "JPEG", not "JPG"
+
+
+def category_for(fmt: str) -> str:
+    return "Images"
 
 
 def is_available() -> bool:

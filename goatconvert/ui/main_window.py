@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QDragEnterEvent, QDropEvent, QIcon
@@ -191,5 +192,11 @@ class MainWindow(QMainWindow):
         QMessageBox.warning(self, "Conversion failed", message)
 
     def reveal_output(self):
-        if self.output_path and os.path.exists(self.output_path):
+        if not (self.output_path and os.path.exists(self.output_path)):
+            return
+        if sys.platform == "darwin":
             subprocess.run(["open", "-R", self.output_path])
+        elif sys.platform.startswith("win"):
+            subprocess.run(["explorer", f"/select,{self.output_path}"])
+        else:
+            subprocess.run(["xdg-open", os.path.dirname(self.output_path)])
