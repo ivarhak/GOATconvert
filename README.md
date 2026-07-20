@@ -1,3 +1,5 @@
+![Uploading Screenshot 2026-07-20 at 5.46.49 PM.png…]()
+
 # 🐐 GOATconvert
 
 A fully offline, local file conversion desktop app. Drop in a file, search
